@@ -17,7 +17,7 @@ pub struct Log {
 impl Log {
     pub fn parse_lines(lines: Vec<String>) -> Vec<Log> {
         let mut logs: Vec<Log> = vec![];
-        let re = Regex::new(r"(?P<datetime_str>\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}.\d{9})? ?(?P<level>[A-Z]{3,5})?(: )?(?P<message>.+)?").unwrap();
+        let re = Regex::new(r"(?P<datetime_str>\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}.\d{7,9})? ?(?P<level>[A-Z]{3,5})?(: )?(?P<message>.+)?").unwrap();
 
         for line in lines.iter() {
             let caps = re.captures(line).unwrap();
@@ -49,6 +49,7 @@ impl Log {
                 }
                 (None, None) => match (logs.last_mut(), message_match) {
                     (Some(last_log), Some(message_match)) => {
+                        last_log.message += " ";
                         last_log.message += message_match.as_str();
                     }
                     _ => (),
