@@ -1,14 +1,13 @@
-use chrono::naive::serde::ts_nanoseconds;
+use chrono::naive::serde::ts_milliseconds;
 use chrono::NaiveDateTime;
 
 use serde::{Deserialize, Serialize};
 
 use regex::Regex;
 
-
 #[derive(Deserialize, Serialize)]
 pub struct Log {
-    #[serde(with = "ts_nanoseconds")]
+    #[serde(with = "ts_milliseconds")]
     pub datetime: NaiveDateTime,
     pub level: String,
     pub message: String,
