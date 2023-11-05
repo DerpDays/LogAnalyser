@@ -1,27 +1,16 @@
 use notify::event::RemoveKind;
+use notify::EventKind;
 use notify::{
     event::{CreateKind, ModifyKind},
     Watcher,
 };
-use notify::{Event, EventKind};
 use std::path::PathBuf;
 use tokio::fs::{File, ReadDir};
 use tokio::io::AsyncSeekExt;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 
-
-// example:
-// #[tokio::main]
-// async fn main() -> () {
-//     let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
-//
-//     tokio::task::spawn(async move { watch_logs(&PathBuf::from("./logs"), tx).await });
-//     let _ = process_logs(rx).await;
-//
-//     ()
-// }
-
+use crate::log_parser::Log;
 
 struct FileHandle {
     path: PathBuf,
@@ -32,7 +21,6 @@ pub struct RawLogData {
     path: PathBuf,
     lines: Vec<String>,
 }
-
 
 async fn files_from_dir(mut directory: ReadDir) -> Vec<FileHandle> {
     let mut files: Vec<FileHandle> = vec![];
@@ -52,10 +40,11 @@ async fn files_from_dir(mut directory: ReadDir) -> Vec<FileHandle> {
     files
 }
 
-async fn process_logs(mut rx: UnboundedReceiver<Vec<RawLogData>>) -> () {
+pub async fn process_logs(mut rx: UnboundedReceiver<Vec<RawLogData>>) -> () {
     while let Some(log) = rx.recv().await {
         for data in log.iter() {
-            println!("{:?}", data.lines);
+            let logs = Log::parse_lines(data.lines.to_vec());
+            let json = serde_json::to_string(&logs);
         }
     }
 }
@@ -170,31 +159,6 @@ async fn read_till_end(file: &mut File) -> Option<Vec<String>> {
     }
     Some(res)
 }
-
-
-
-
-
-struct Log;
-
-fn adsadsa(inp: Vec<String>) -> Vec<Log> {
-    let iter = inp.into_iter();
-    inp.into_iter().take_while(|val| {
-        val1 = val.split_whitespace();
-        if val1.len() >=2 {
-            match parsing_date(val1[0:1]) {
-                Ok(_) => true,
-                Err(_) => false
-            }
-        } else {
-            false
-        }
-    });
-    vec![]
-}
-
-
-
 
 // TODO: REFACTOR
 
@@ -311,4 +275,3 @@ fn adsadsa(inp: Vec<String>) -> Vec<Log> {
 //         }
 //     }
 // }
-
