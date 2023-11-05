@@ -15,7 +15,7 @@ mod watch;
 async fn main() -> () {
     let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
 
-    tokio::task::spawn(async move { watch::watch_logs(&PathBuf::from("../logs"), tx).await });
+    tokio::task::spawn(async move { watch::watch_logs(&PathBuf::from("./logs"), tx).await });
     tokio::task::spawn(async move { watch::process_logs(rx).await });
 
     tracing_subscriber::fmt::init();
@@ -23,7 +23,7 @@ async fn main() -> () {
     let app = Router::new()
         .route("/", get(handler));
 
-    let addr = SocketAddr::from(([100, 112, 100, 112], 3000));
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     tracing::debug!("listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
